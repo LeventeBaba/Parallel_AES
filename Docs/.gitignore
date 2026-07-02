@@ -1,0 +1,64 @@
+# Fordított kimenetek
+output/
+
+# LaTeX ideiglenes fájlok
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.lol
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.xdv
+*.nav
+*.snm
+*.vrb
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.loa
+*.maf
+*.mtc
+*.mtc0
+*.pyg
+*.synctex
+*.synctex(busy)
+*.tdo
+
+# latexmk
+*.dvi
+*.ps
+*.synctex.gz(busy)
+
+# Szerkesztői mentések
+*~
+*.bak
+*.swp
+*.swo
+.#*
+
+# Operációs rendszer fájljai
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editor mappák
+.vscode/
+.idea/
+generated/
+build/
+-p/
