@@ -1,0 +1,115 @@
+\chapter{Az AES titkosítás és különösen a GCM mód}
+
+Ebben a fejezetben összefoglalom az AES blokk-kód alapötletét, majd a projektben használt
+\textbf{CTR} és \textbf{GCM} mód lényegét. A hangsúly a GCM-en van, mert ez egyszerre ad
+\emph{titkosságot} és \emph{integritást/hitelességet} (AEAD: Authenticated Encryption with Associated Data).
+
+\section{AES rövid áttekintés}
+
+Az \textbf{AES (Advanced Encryption Standard)} egy 128 bites blokk-kód, amely
+\textbf{128/192/256 bites} kulcsokkal működik. A titkosítás több \emph{round}-ból áll
+(10/12/14 round a kulcsmérettől függően), és minden round tipikusan négy klasszikus lépést tartalmaz:
+
+\begin{itemize}
+  \item \textbf{SubBytes}: nemlineáris S-box helyettesítés bájtonként,
+  \item \textbf{ShiftRows}: sor-eltolás a 4x4-es state mátrixban,
+  \item \textbf{MixColumns}: lineáris keverés oszloponként (GF($2^8$) felett),
+  \item \textbf{AddRoundKey}: round-kulcs XOR-olása a state-tel.
+\end{itemize}
+
+A blokk-kód önmagában csak fix méretű (128 bit) blokkokra értelmezett, ezért gyakorlati használathoz
+üzemmódra van szükség.
+
+\section{CTR mód (Counter mode)}
+
+A \textbf{CTR} (counter) mód stream-szerű titkosítást ad: egy számlálóval (counter) generálok
+egy \emph{kulcsfolyamot} (\emph{keystream}), amit XOR-olok a plaintexttel.
+
+\begin{align*}
+  S_i &= AES_K(IV \| counter_i) \\\\
+  C_i &= P_i \oplus S_i
+\end{align*}
+
+Fontos tulajdonságok:
+\begin{itemize}
+  \item A blokkok \emph{függetlenek}: $S_i$ számolható párhuzamosan $\rightarrow$ CTR kiválóan párhuzamosítható GPU-n is.
+  \item Az IV/counter párnak \emph{egyedinek} kell lennie ugyanazzal a kulccsal (különben kulcsfolyam-újrafelhasználás lép fel).
+\end{itemize}
+
+\section{GCM mód (Galois/Counter Mode) -- miért több, mint CTR?}
+
+A CTR önmagában \textbf{nem} ad integritást: a ciphertext módosítható, és a decrypt után
+ellenőrzés nélkül hibás plaintext jön ki. A \textbf{GCM} ezt kiegészíti egy
+\textbf{hitelesítő tag} (authentication tag) számításával.
+
+A GCM két fő része:
+\begin{enumerate}
+  \item \textbf{Titkosítás CTR-rel} (mint fent),
+  \item \textbf{GHASH} -- egy polinomiális MAC-szerű összegzés GF($2^{128}$) felett, amely az AAD-t és a ciphertextet összegzi.
+\end{enumerate}
+
+\subsection{A GHASH alapötlete}
+
+A GCM kiszámít egy hash-szubrutin kulcsot:
+\[
+H = AES_K(0^{128})
+\]
+Majd a \textbf{GHASH} az AAD és a ciphertext blokkokat egy GF($2^{128}$) mezőben értelmezve
+szorozza/összegzi $H$-val. Ebből jön ki egy 128 bites érték, amit a végén még CTR-rel
+``letitkosít'' a tag előállításához.
+
+\subsection{GCM adatfolyam (ábra)}
+
+Az alábbi ábra a projektben is használt tipikus (12 bájtos) IV-es GCM folyamatot mutatja.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.92\textwidth}{!}{%
+  \begin{tikzpicture}[
+    box/.style={draw, rectangle, rounded corners=2pt, align=center, minimum width=3.8cm, minimum height=0.95cm},
+    small/.style={draw, rectangle, rounded corners=2pt, align=center, minimum width=3.0cm, minimum height=0.82cm},
+    arrow/.style={-Latex, thick}
+  ]
+    \node[box] (pt) at (0,0) {Plaintext $P$};
+    \node[box] (ctr) at (5.0,0) {AES-CTR\\(keystream + XOR)};
+    \node[box] (ct) at (10.0,0) {Ciphertext $C$};
+
+    \node[small] (aad) at (5.0,-2.2) {AAD};
+    \node[box] (ghash) at (10.0,-2.2) {GHASH\\GF($2^{128}$)};
+
+    \node[small] (j0) at (5.0,-4.5) {$J_0$ (IV-ből)};
+    \node[small] (h) at (10.0,-4.5) {$H = AES_K(0^{128})$};
+    \node[small] (tag) at (7.5,-6.6) {Tag $T$};
+
+    \draw[arrow] (pt) -- (ctr);
+    \draw[arrow] (ctr) -- (ct);
+    \draw[arrow] (ct) -- (ghash);
+    \draw[arrow] (aad.east) -- (ghash.west);
+    \draw[arrow] (h) -- (ghash);
+    \draw[arrow] (j0.east) -- (tag.west);
+    \draw[arrow] (ghash.south west) -- (tag.north east);
+
+    \node[align=center, font=\scriptsize] at (7.5,-7.7) {$T = AES_K(J_0) \oplus GHASH_H(AAD, C)$};
+  \end{tikzpicture}%
+  }
+  \caption{AES-GCM magas szintű folyamat: CTR titkosítás + GHASH + tag előállítás.}
+\end{figure}
+
+\subsection{Dekódolás / ellenőrzés}
+
+Visszafejtéskor először a megkapott $AAD$ és $C$ alapján újraszámolom a tag-et,
+és \textbf{csak akkor fogadom el a plaintextet}, ha a tag egyezik. Ez a lényegi különbség
+a sima CTR-hez képest: a GCM \emph{hitelesített titkosítás}.
+
+\section{Miért érdekes ez teljesítmény szempontból?}
+
+\begin{itemize}
+  \item CTR-ben a blokkok függetlensége miatt a GPU-s párhuzamosítás nagyon természetes.
+  \item GCM-ben a CTR rész ugyanúgy jól skálázódik, de a GHASH egy része és a tag kezelés
+        \emph{szekvenciális komponenseket} is bevisz a folyamatba. Emiatt a gyorsítás mértéke
+        általában kisebb, mint a ``tiszta'' CTR-ben.
+  \item Emellett a GPU-s útvonalnál a host--device adatmozgatás (\emph{memcpy/PCIe}) fix költsége
+        kisebb adatmennyiségnél könnyen dominálhat.
+\end{itemize}
+
+\cleardoublepage

@@ -1,0 +1,85 @@
+\chapter{A projekt bemutatása}
+
+A féléves projekt célja egy olyan \textbf{AES-alapú titkosító rendszer} elkészítése volt,
+amely ugyanazt a funkciót több különböző végrehajtási úton tudja biztosítani:
+
+\begin{itemize}
+  \item \textbf{Natív, szekvenciális CPU implementáció} (C nyelven) -- ez adja az alap (baseline) viselkedést.
+  \item \textbf{OpenCL-gyorsított megoldás} -- a párhuzamosítható részeket GPU-n futtatom.
+  \item \textbf{Menedzselt .NET referencia} -- a beépített .NET kriptográfiai implementáció (összehasonlítási referencia).
+\end{itemize}
+
+A projekt két fő felhasználói felületet kínál: (1) egy \emph{single-file} titkosító/dekódoló részt,
+amellyel fájlokat lehet csomagolt formában kezelni, valamint (2) egy \emph{benchmark} modult,
+amely több iterációban méri a teljesítményt, és az eredményeket CSV-be menti.
+
+\section{Kódbázis felépítése}
+
+A repository több komponensből áll:
+
+\begin{itemize}
+  \item \textbf{\code{AES.WinForms}}: .NET WinForms alkalmazás, amely a GUI-t, a benchmark futtatást és a CSV export/importot kezeli.
+  \item \textbf{\code{aeslib}}: natív C könyvtár az AES blokk-kódhoz és a módokhoz (CTR, GCM, CBC), valamint tesztek/benchmark/profiling.
+  \item \textbf{\code{crypto\_aes\_opencl}}: OpenCL-es útvonal (host oldal C-ben + OpenCL kernel fájlok), külön tesztek és profiling.
+  \item \textbf{\code{kernel\_loader}}: segédkönyvtár a kernel fájlok betöltéséhez (pl. futtatási környezettől függő útvonalkezelés).
+  \item \textbf{\code{Docs}}: ez a dokumentum + a mért eredményeket tartalmazó CSV-k.
+\end{itemize}
+
+\section{Architektúra áttekintő ábra}
+
+Az alábbi ábra a legfontosabb komponenseket és a hívási útvonalakat foglalja össze.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.94\textwidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=12mm,
+    box/.style={draw, rectangle, rounded corners=2pt, align=center, minimum width=4.2cm, minimum height=0.9cm},
+    small/.style={draw, rectangle, rounded corners=2pt, align=center, minimum width=3.2cm, minimum height=0.8cm},
+    arrow/.style={-Latex, thick}
+  ]
+    \node[box] (ui) {WinForms GUI\\\small \code{Form1}, szolgáltatások};
+    \node[box, below=of ui] (bench) {BenchmarkService\\CSV export/import};
+    \node[small, below left=of bench, xshift=-8mm] (managed) {Menedzselt\\\code{System.Security.Cryptography}};
+    \node[small, below=of bench] (native) {Natív CPU\\\code{aeslib} (C)};
+    \node[small, below right=of bench, xshift=8mm] (opencl) {OpenCL gyorsítás\\\code{crypto\_aes\_opencl}};
+
+    \node[box, below=of opencl, yshift=4mm] (kernels) {OpenCL kernelfájlok\\\code{kernels/*.cl}};
+
+    \draw[arrow] (ui) -- (bench);
+    \draw[arrow] (bench) -- (managed);
+    \draw[arrow] (bench) -- (native);
+    \draw[arrow] (bench) -- (opencl);
+    \draw[arrow] (opencl) -- (kernels);
+  \end{tikzpicture}%
+  }
+  \caption{A projekt fő komponensei és a hívási irányok.}
+\end{figure}
+
+\section{A három kriptográfiai ``engine''}
+
+A benchmark és a single-file modul ugyanazt a \emph{fogalmi} API-t használja: \emph{engine} + \emph{algoritmus} + \emph{paraméterek}.
+
+\begin{description}
+  \item[Natív CPU] Saját C implementációm, amely a logikát jól követhetően, \emph{szekvenciálisan} valósítja meg.
+  \item[OpenCL] A titkosítás párhuzamosítható részét GPU-n futtatom. CTR-ben a blokk-függetlenség miatt ez különösen kézenfekvő.
+        GCM-ben az AES-CTR rész és a GHASH feldolgozás egy része párhuzamosítható, viszont a tag előállítás/ellenőrzés miatt van szekvenciális komponens is.
+  \item[Menedzselt AES] A .NET beépített implementáció (pl. \code{AesGcm}) modern CPU-n jellemzően AES-NI/specializált utasításokra támaszkodik,
+        ezért ez \emph{nem baseline}, csak referencia.
+\end{description}
+
+\section{Mit mérek a benchmarkokban?}
+
+Egy mérési \emph{session} során azonos paraméterek mellett több iterációban futtatok:
+
+\begin{itemize}
+  \item \textbf{Titkosítás} (\emph{Encrypt}) és \textbf{visszafejtés} (\emph{Decrypt})
+  \item \textbf{Átviteli sebesség} (Throughput, \mbps)
+  \item \textbf{Futási idő} (Elapsed, \ms)
+  \item OpenCL esetén: \textbf{gyorsulás} a natív CPU baseline-hoz képest (\emph{SpeedupVsSequentialNativeCpu})
+\end{itemize}
+
+A dokumentum második fele ezekből a CSV-kből kiindulva elemzi az eltéréseket architektúra (x86/x64),
+tápellátás (akkumulátor/töltő) és paraméterek (kulcsméret, adatméret, CTR vs GCM) szerint.
+
+\cleardoublepage

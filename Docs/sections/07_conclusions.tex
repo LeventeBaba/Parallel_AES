@@ -1,0 +1,50 @@
+\chapter{Összegzés}
+
+A féléves projektben elkészítettem egy AES-alapú titkosító rendszert, amely:
+
+\begin{itemize}
+  \item több üzemmódot kezel (CTR, GCM; natív oldalon CBC is elérhető),
+  \item több végrehajtási utat kínál (natív CPU, OpenCL, managed .NET referencia),
+  \item és egy WinForms felületen keresztül mérhető/összehasonlítható.
+\end{itemize}
+
+\section{Válaszok az általam vizsgált kérdésekre}
+
+\subsection{x64 vagy x86 gyorsabb?}
+
+A mérések alapján:
+
+\begin{itemize}
+  \item \textbf{Natív CPU}: jellemzően \textbf{x64 gyorsabb} (PC2/PC3/PC4).
+  \item \textbf{Managed .NET}: szintén \textbf{x64 gyorsabb}, sok esetben nagy különbséggel.
+  \item \textbf{OpenCL}: a throughput \textbf{nagyon hasonló} x86 és x64 között; ahol diszkrét GPU dolgozik (PC4),
+        gyakorlatilag 1\% körüli eltéréseket látni.
+\end{itemize}
+
+Ennek alapján én azt mondom, hogy az x64 előnye főleg a CPU/JIT oldalon jön ki,
+az OpenCL kernel futásideje viszont kevésbé érzékeny a host architektúrára.
+
+\subsection{Befolyásolja-e a töltő (PC3) a gyorsaságot?}
+
+Igen. PC3-on töltőn minden engine gyorsabb, különösen a CPU-intenzív esetek.
+Ezt a power management (órajel/boost limit, energiatakarékossági profil) természetes következményének tartom.
+
+\section{További megfigyelések}
+
+\begin{itemize}
+  \item \textbf{Kulcsméret növelése} általában csökkenti a throughputot (CTR és GCM esetén is).
+  \item \textbf{Nagyobb bemenet} OpenCL-nél segít: az overhead jobban amortizálódik, ezért 256 MB-nál jellemzően jobb throughputot mértem, mint 64 MB-nál.
+  \item \textbf{PC1 OpenCL x86} futtatás nem sikerült: a legvalószínűbb ok a 32 bites OpenCL runtime/driver hiánya.
+\end{itemize}
+
+\section{Lehetséges fejlesztési irányok}
+
+Ha tovább vinném a projektet, a következőket tartanám a legértékesebbnek:
+
+\begin{itemize}
+  \item Natív CPU oldalon AES-NI / vektorizálás (SIMD) bevezetése, hogy a baseline ne legyen ennyire távol a modern implementációktól.
+  \item OpenCL oldalon a host--device adatmozgatás csökkentése (pl. pinned memory, nagyobb chunk-ok, overlapped copy/compute).
+  \item GCM GHASH rész további párhuzamosítása (pl. nagyobb blokkosítás, precomputált táblák, jobb redukciós stratégia).
+\end{itemize}
+
+\cleardoublepage

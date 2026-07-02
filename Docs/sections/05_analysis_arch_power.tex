@@ -1,0 +1,123 @@
+\chapter{Architektúra (x86/x64) és tápellátás hatása}
+
+Ebben a fejezetben kifejezetten azokat a kérdéseket vizsgálom, amelyeket különösen érdekesnek tartok:
+
+\begin{itemize}
+  \item \textbf{x86 vs x64}: melyik gyorsabb, és miért?
+  \item \textbf{Töltőn vs akkumulátorról} (PC3): mennyire látszik a power management hatása?
+\end{itemize}
+
+\section{x86 vs x64 -- mit vártam előre?}
+
+\begin{itemize}
+  \item A \textbf{natív CPU} útvonalnál az x64 előnye reális: több regiszter, modernebb ABI, jobb optimalizálási lehetőség.
+  \item A \textbf{managed .NET} esetén szintén várható különbség, mert a JIT és a natív intrinsics (pl. AES-NI) kihasználása 64 biten tipikusan jobb.
+  \item Az \textbf{OpenCL} útvonalnál viszont azt vártam, hogy az x86/x64 különbség kicsi lesz, mert a számítás zöme a GPU-n fut,
+        és a host oldalon főleg ``csomagolás'' + adatmozgatás történik. Itt inkább a driver/runtime verzió és a platform számít.
+\end{itemize}
+
+A mért adatok ezt nagyrészt alá is támasztják.
+
+\section{PC3: töltő hatása (GCM-256, 64 MB)}
+
+A PC3 egy laptop, ezért különösen érdekes volt megnézni, mennyire fogja vissza a rendszer a teljesítményt akkumulátorról.
+
+\subsection{x64 build: töltőn vs akkuról}
+
+\begin{table}[H]
+  \centering
+  \caption{PC3 x64 -- átlag throughput \mbps (GCM-256, 64 MB).}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={Engine,Direction,ChargerOFF,ChargerON,ratio_on_over_off},
+    columns/Engine/.style={string type, column name=Engine},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/ChargerOFF/.style={column name=Akkuról (\mbps), fixed, precision=2},
+    columns/ChargerON/.style={column name=Töltőn (\mbps), fixed, precision=2},
+    columns/ratio_on_over_off/.style={column name=Arány (ON/OFF), fixed, precision=3},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/pc3_power_gcm256_64mb_x64.csv}}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ybar,
+      bar width=7pt,
+      width=0.92\textwidth,
+      height=6.2cm,
+      enlarge x limits=0.06,
+      ylabel={Throughput (\mbps)},
+      xtick=data,
+      x tick label style={rotate=35, anchor=east},
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=2},
+      grid=both,
+    ]
+      \addplot table[x expr=\coordindex, y=ChargerOFF, col sep=comma] {\GenPath/pc3_power_gcm256_64mb_x64.csv};
+      \addplot table[x expr=\coordindex, y=ChargerON,  col sep=comma] {\GenPath/pc3_power_gcm256_64mb_x64.csv};
+      \legend{Akkuról, Töltőn}
+      \node[anchor=north west] at (rel axis cs:0.02,0.98) {\scriptsize Sorrend: Engine/Direction párok, mint a táblában.};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC3 x64 -- töltő hatása (GCM-256, 64 MB).}
+\end{figure}
+
+\subsection{x86 build: töltőn vs akkuról}
+
+\begin{table}[H]
+  \centering
+  \caption{PC3 x86 -- átlag throughput \mbps (GCM-256, 64 MB).}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={Engine,Direction,ChargerOFF,ChargerON,ratio_on_over_off},
+    columns/Engine/.style={string type, column name=Engine},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/ChargerOFF/.style={column name=Akkuról (\mbps), fixed, precision=2},
+    columns/ChargerON/.style={column name=Töltőn (\mbps), fixed, precision=2},
+    columns/ratio_on_over_off/.style={column name=Arány (ON/OFF), fixed, precision=3},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/pc3_power_gcm256_64mb_x86.csv}}
+\end{table}
+
+\subsection{Megfigyelések}
+
+A PC3 mérésekből két hatás nagyon tisztán látszik:
+
+\begin{itemize}
+  \item \textbf{Töltőn gyorsabb}: mindhárom engine-nél látszik javulás, különösen a CPU-intenzív (Native/Managed) esetekben.
+  \item \textbf{OpenCL-nél kisebb a különbség}: itt is nő a throughput töltőn, de kisebb mértékben.
+        Ezt úgy értelmezem, hogy az OpenCL útvonalat inkább a GPU + memória/driver overhead dominálja, míg akkuról elsősorban a CPU órajelek esnek vissza.
+\end{itemize}
+
+\section{x86 vs x64 összegzés a mérések alapján}
+
+\subsection{PC2: laptopos konfiguráció (integrált GPU)}
+
+A PC2-n -- amely szintén laptop -- az x64 a natív és managed útvonalon látványosan gyorsabb,
+OpenCL-nél viszont csak pár százalék a különbség (a GPU végzi a munkát, a host oldali overhead kisebb arányban változik).
+
+\subsection{PC4: erős diszkrét GPU (RTX 4060)}
+
+PC4-en az OpenCL throughput x86 és x64 között gyakorlatilag azonos (tipikusan 1\% körüli eltérés),
+miközben a natív CPU baseline x64-en jelentősen gyorsabb.
+Ennek következménye, hogy az OpenCL \emph{speedup} (baseline-hoz viszonyítva) x86 buildben nagyobb számnak látszik,
+de ez főleg azért van, mert a baseline lassabb.
+
+\subsection{OpenCL és ``deprecated'' függvények hipotézis}
+
+Saját felvetésem szerint az x64 gyorsabb lehet részben azért, mert az OpenCL kód
+kompatibilitási okból régebbi függvényeket is használ az x86-os környezet támogatásához. A \emph{mért adatok} alapján:
+
+\begin{itemize}
+  \item ahol ugyanaz az OpenCL platform/driver fut (pl. PC4 NVIDIA CUDA OpenCL), ott az x86/x64 OpenCL throughput szinte azonos,
+        tehát a kernel futásideje domináns, és a host architektúra alig látszik.
+  \item ahol az OpenCL platform eleve gyengébb (pl. integrált GPU), ott is csak kicsi az arch különbség.
+\end{itemize}
+
+Ebből én azt a következtetést vonom le, hogy \textbf{ha van is} ilyen deprecated API hatás,
+akkor a jelen benchmarkokban \emph{nem ez} a fő tényező -- a driver/runtime és a GPU képességei sokkal jobban számítanak.
+
+\cleardoublepage

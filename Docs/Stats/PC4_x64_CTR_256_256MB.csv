@@ -1,0 +1,70 @@
+#SessionId,639a975a-ab9f-4bb2-9af7-2daef64cdc83
+#CreatedUtc,2026-03-18T20:16:41.4488957+00:00
+#Algorithm,Ctr
+#Padding,Pkcs7
+#KeySizeBits,256
+#DataSizeMegabytes,256
+#IterationCount,5
+#WarmupBeforeRun,True
+#Password,Levi2003@
+#SaltBase64,TdaPbLbsT5ib/jO7ntcDNA==
+#Iv16Base64,QDdGMj+3/KNfOAE4bnx4Yg==
+#Iv12Base64,5PKN07mvluU+WrvW
+#AadBase64,Nf0NHhUY6Rd5W9I09fLeOg==
+#EnvironmentDescription,".NET 10.0.5 | Windows 10 Pro 25H2 | x64 | AMD Ryzen 7 5800X 8-Core Processor              (Cores: 8, Logical: 16, Max MHz: 4700) | GPU: NVIDIA GeForce RTX 4060 | RAM: 32.00 GiB, 2 module(s), 2400 MHz | Power: AC power | OpenCL: OpenCL 3.0 CUDA"
+#FrameworkDescription,.NET 10.0.5
+#OperatingSystemDescription,Microsoft Windows 10.0.26200
+#WindowsVersion,Windows 10 Pro 25H2
+#WindowsBuild,Build 26200.8037
+#ProcessArchitecture,X64
+#BuildArchitecture,x64
+#LogicalProcessorCount,16
+#ProcessorName,AMD Ryzen 7 5800X 8-Core Processor             
+#ProcessorCoreCount,8
+#ProcessorLogicalCoreCount,16
+#ProcessorMaxClockMHz,4700
+#GpuName,NVIDIA GeForce RTX 4060
+#MotherboardName,ASUSTeK COMPUTER INC. TUF GAMING B550M-PLUS
+#PowerSource,AC power
+#WindowsPowerPlan,Balanced [381b4222-f694-41f0-9685-ff5bb260df2e]
+#RamTotal,"32.00 GiB, 2 module(s), 2400 MHz"
+#RamModules,16.00 GiB 2400 MHz Kingston KF3600C16D4/16GX | 16.00 GiB 2400 MHz Kingston KF3600C16D4/16GX
+#OpenClPlatformName,NVIDIA CUDA
+#OpenClPlatformVersion,OpenCL 3.0 CUDA 13.2.51
+#OpenClDeviceName,NVIDIA GeForce RTX 4060
+#OpenClDeviceVersion,OpenCL 3.0 CUDA
+#OpenClCVersion,OpenCL C 1.2 
+#OpenClInfoStatus,OpenCL platform and device information resolved successfully.
+#Notes,"The benchmark compares the native sequential AES, the OpenCL-parallel AES, and managed .NET AES when the selected combination is available. Speed-up is reported only for the OpenCL-parallel AES relative to the native sequential AES baseline. Managed AES is shown as an informational reference only and is not used as the speed-up baseline. Managed AES is benchmarked only for CBC and GCM. Decrypt benchmarks reuse a shared pre-generated ciphertext per iteration to reduce peak memory usage and keep inputs identical across engines. Padding may change the output size for block-based processing."
+
+TimestampUtc,Iteration,Engine,Direction,Algorithm,Padding,KeySizeBits,InputBytes,OutputBytes,ElapsedMilliseconds,ThroughputMegabytesPerSecond,Succeeded,SpeedupVsSequentialNativeCpu,ManagedReferenceRatio,Note
+2026-03-18T20:16:41.4488957+00:00,1,NativeCpu,Encrypt,Ctr,Pkcs7,256,268435456,268435472,5916.316500,43.270166,True,,,
+2026-03-18T20:16:41.4488957+00:00,1,OpenCl,Encrypt,Ctr,Pkcs7,256,268435456,268435472,416.137100,615.181872,True,14.227379,,
+2026-03-18T20:16:41.4488957+00:00,1,ManagedAes,Encrypt,Ctr,Pkcs7,256,268435456,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,1,NativeCpu,Decrypt,Ctr,Pkcs7,256,268435472,268435456,5914.250600,43.285284,True,,,
+2026-03-18T20:16:41.4488957+00:00,1,OpenCl,Decrypt,Ctr,Pkcs7,256,268435472,268435456,417.400400,613.320005,True,14.172025,,
+2026-03-18T20:16:41.4488957+00:00,1,ManagedAes,Decrypt,Ctr,Pkcs7,256,268435472,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,2,NativeCpu,Encrypt,Ctr,Pkcs7,256,268435456,268435472,5915.316700,43.277480,True,,,
+2026-03-18T20:16:41.4488957+00:00,2,OpenCl,Encrypt,Ctr,Pkcs7,256,268435456,268435472,425.913300,601.061296,True,13.900811,,
+2026-03-18T20:16:41.4488957+00:00,2,ManagedAes,Encrypt,Ctr,Pkcs7,256,268435456,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,2,NativeCpu,Decrypt,Ctr,Pkcs7,256,268435472,268435456,5914.251600,43.285276,True,,,
+2026-03-18T20:16:41.4488957+00:00,2,OpenCl,Decrypt,Ctr,Pkcs7,256,268435472,268435456,410.358500,623.844797,True,14.415222,,
+2026-03-18T20:16:41.4488957+00:00,2,ManagedAes,Decrypt,Ctr,Pkcs7,256,268435472,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,3,NativeCpu,Encrypt,Ctr,Pkcs7,256,268435456,268435472,5916.203500,43.270993,True,,,
+2026-03-18T20:16:41.4488957+00:00,3,OpenCl,Encrypt,Ctr,Pkcs7,256,268435456,268435472,410.264800,623.987239,True,14.431022,,
+2026-03-18T20:16:41.4488957+00:00,3,ManagedAes,Encrypt,Ctr,Pkcs7,256,268435456,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,3,NativeCpu,Decrypt,Ctr,Pkcs7,256,268435472,268435456,5912.330800,43.299339,True,,,
+2026-03-18T20:16:41.4488957+00:00,3,OpenCl,Decrypt,Ctr,Pkcs7,256,268435472,268435456,394.431100,649.036081,True,14.997319,,
+2026-03-18T20:16:41.4488957+00:00,3,ManagedAes,Decrypt,Ctr,Pkcs7,256,268435472,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,4,NativeCpu,Encrypt,Ctr,Pkcs7,256,268435456,268435472,5918.196200,43.256423,True,,,
+2026-03-18T20:16:41.4488957+00:00,4,OpenCl,Encrypt,Ctr,Pkcs7,256,268435456,268435472,433.498800,590.543734,True,13.657570,,
+2026-03-18T20:16:41.4488957+00:00,4,ManagedAes,Encrypt,Ctr,Pkcs7,256,268435456,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,4,NativeCpu,Decrypt,Ctr,Pkcs7,256,268435472,268435456,5923.097300,43.220633,True,,,
+2026-03-18T20:16:41.4488957+00:00,4,OpenCl,Decrypt,Ctr,Pkcs7,256,268435472,268435456,419.328100,610.500501,True,14.106875,,
+2026-03-18T20:16:41.4488957+00:00,4,ManagedAes,Decrypt,Ctr,Pkcs7,256,268435472,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,5,NativeCpu,Encrypt,Ctr,Pkcs7,256,268435456,268435472,5936.668700,43.121827,True,,,
+2026-03-18T20:16:41.4488957+00:00,5,OpenCl,Encrypt,Ctr,Pkcs7,256,268435456,268435472,402.409300,636.168200,True,14.712732,,
+2026-03-18T20:16:41.4488957+00:00,5,ManagedAes,Encrypt,Ctr,Pkcs7,256,268435456,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.
+2026-03-18T20:16:41.4488957+00:00,5,NativeCpu,Decrypt,Ctr,Pkcs7,256,268435472,268435456,5913.114800,43.293598,True,,,
+2026-03-18T20:16:41.4488957+00:00,5,OpenCl,Decrypt,Ctr,Pkcs7,256,268435472,268435456,417.154600,613.681391,True,14.180376,,
+2026-03-18T20:16:41.4488957+00:00,5,ManagedAes,Decrypt,Ctr,Pkcs7,256,268435472,0,0.000000,0.000000,False,,,Managed AES does not support this algorithm and padding combination.

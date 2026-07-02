@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>x86;x64</Platforms>
+    <PlatformTarget Condition="'$(PlatformTarget)' == '' and '$(Platform)' != '' and '$(Platform)' != 'AnyCPU'">$(Platform)</PlatformTarget>
+    <PlatformTarget Condition="'$(PlatformTarget)' == ''">x86</PlatformTarget>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(PlatformTarget)' == 'x86'">win-x86</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(PlatformTarget)' == 'x64'">win-x64</RuntimeIdentifier>
+    <NativeProjectsRoot>$(MSBuildProjectDirectory)\..\..</NativeProjectsRoot>
+    <OpenClProjectDir>$(NativeProjectsRoot)\crypto_aes_opencl</OpenClProjectDir>
+    <AesLibProjectDir>$(NativeProjectsRoot)\aeslib</AesLibProjectDir>
+    <KernelLoaderProjectDir>$(NativeProjectsRoot)\kernel_loader</KernelLoaderProjectDir>
+    <NativeMakeCommand Condition="'$(NativeMakeCommand)' == ''">make</NativeMakeCommand>
+    <NativeBuildSubdir Condition="'$(NativeBuildSubdir)' == ''">$(PlatformTarget)</NativeBuildSubdir>
+    <NativeExtraArguments Condition="'$(NativeExtraArguments)' == ''"></NativeExtraArguments>
+    <NativeBuildCommand Condition="'$(NativeBuildCommand)' == '' and '$(NativeExtraArguments)' == ''">$(NativeMakeCommand) shared BUILD_SUBDIR=$(NativeBuildSubdir)</NativeBuildCommand>
+    <NativeBuildCommand Condition="'$(NativeBuildCommand)' == '' and '$(NativeExtraArguments)' != ''">$(NativeMakeCommand) shared BUILD_SUBDIR=$(NativeBuildSubdir) $(NativeExtraArguments)</NativeBuildCommand>
+    <OpenClBuildBinDir>$(OpenClProjectDir)\build\$(NativeBuildSubdir)\bin</OpenClBuildBinDir>
+    <AesLibBuildBinDir>$(AesLibProjectDir)\build\$(NativeBuildSubdir)\bin</AesLibBuildBinDir>
+    <KernelLoaderBuildBinDir>$(KernelLoaderProjectDir)\build\$(NativeBuildSubdir)\bin</KernelLoaderBuildBinDir>
+  </PropertyGroup>
+
+  <Target Name="BuildNativeDependencies" BeforeTargets="Build" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Message Text="Building native AES dependencies for $(PlatformTarget) with: $(NativeBuildCommand)" Importance="high" />
+    <Exec WorkingDirectory="$(OpenClProjectDir)" Command="$(NativeBuildCommand)" ContinueOnError="false" StandardOutputImportance="high" StandardErrorImportance="high" ConsoleToMSBuild="true" />
+  </Target>
+
+  <Target Name="CopyNativeDependencies" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <ItemGroup>
+      <NativeRuntimeFiles Include="$(OpenClBuildBinDir)\*.*" />
+      <NativeRuntimeFiles Include="$(AesLibBuildBinDir)\*.*" />
+      <NativeRuntimeFiles Include="$(KernelLoaderBuildBinDir)\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeRuntimeFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="@(NativeRuntimeFiles) != ''" />
+    <ItemGroup>
+      <KernelFiles Include="$(OpenClBuildBinDir)\kernels\*.*" />
+    </ItemGroup>
+    <MakeDir Directories="$(TargetDir)kernels" Condition="@(KernelFiles) != ''" />
+    <Copy SourceFiles="@(KernelFiles)" DestinationFolder="$(TargetDir)kernels" SkipUnchangedFiles="true" Condition="@(KernelFiles) != ''" />
+  </Target>
+</Project>

@@ -1,0 +1,126 @@
+\chapter{A speed-up szélsőértékei}
+
+Ebben a fejezetben külön is megvizsgálom, hogy a teljes mérési halmazon belül
+hol mértem a \textbf{legnagyobb}, illetve a \textbf{legkisebb} gyorsítást.
+
+A speed-up definíciója a dokumentumban mindenhol ugyanaz:
+\textbf{mindig a saját natív C implementációt veszem baseline-nak}, és ehhez
+viszonyítom az OpenCL-es útvonalat. Vagyis a speed-up azt fejezi ki,
+hogy az OpenCL-es végrehajtás hányszor gyorsabb a natív CPU-s megoldásnál.
+
+\section{Összesített szélsőértékek}
+
+\begin{table}[H]
+  \centering
+  \caption{A teljes mérési halmaz legkisebb és legnagyobb OpenCL speed-up értéke.}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={Extreme,PC,BuildArchitecture,PowerState,Algorithm,KeySizeBits,DataSizeMegabytes,Direction,mean_speedup},
+    columns/Extreme/.style={string type, column name=Szélsőérték},
+    columns/PC/.style={string type, column name=Gép},
+    columns/BuildArchitecture/.style={string type, column name=Build},
+    columns/PowerState/.style={string type, column name=Tápellátás},
+    columns/Algorithm/.style={string type, column name=Algoritmus},
+    columns/KeySizeBits/.style={column name=Kulcs (bit), fixed, precision=0},
+    columns/DataSizeMegabytes/.style={column name=Adat (MB), fixed, precision=0},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/mean_speedup/.style={column name=Speed-up, fixed, precision=2},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/speedup_extremes.csv}}
+\end{table}
+
+A teljes adathalmazban a \textbf{legkisebb speed-up} a \textbf{PC3 x64, GCM-256, 64 MB, Encrypt, töltőn}
+konfigurációban jelent meg, \textbf{6.95x} értékkel. A \textbf{legnagyobb speed-up} ezzel szemben a
+\textbf{PC4 x86, GCM-256, 256 MB, Encrypt} esetben jelent meg, \textbf{38.97x} értékkel.
+
+Ezt én úgy értelmezem, hogy a minimumnál egy laptopos, visszafogottabb platformot látok,
+olyan esettel, ahol az OpenCL ugyan még mindig jelentősen gyorsabb a natív C baseline-nál,
+de a különbség már nem extrém. A maximumnál viszont egyszerre több tényező erősíti egymást:
+\begin{itemize}
+  \item erős GPU (PC4),
+  \item nagyobb bemenet (256 MB), tehát az OpenCL fix overhead jobban amortizálódik,
+  \item x86 build, ahol a natív CPU baseline lassabb, ezért ugyanaz az OpenCL teljesítmény nagyobb speed-up-ként jelenik meg.
+\end{itemize}
+
+\section{Szélsőértékek architektúránként}
+
+\begin{table}[H]
+  \centering
+  \caption{x64 és x86 szerinti legkisebb/legnagyobb speed-up értékek.}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={Extreme,Architecture,PC,PowerState,Algorithm,KeySizeBits,DataSizeMegabytes,Direction,mean_speedup},
+    columns/Extreme/.style={string type, column name=Szélsőérték},
+    columns/Architecture/.style={string type, column name=Arch.},
+    columns/PC/.style={string type, column name=Gép},
+    columns/PowerState/.style={string type, column name=Tápellátás},
+    columns/Algorithm/.style={string type, column name=Algoritmus},
+    columns/KeySizeBits/.style={column name=Kulcs (bit), fixed, precision=0},
+    columns/DataSizeMegabytes/.style={column name=Adat (MB), fixed, precision=0},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/mean_speedup/.style={column name=Speed-up, fixed, precision=2},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/speedup_arch_extremes.csv}}
+\end{table}
+
+Ez a bontás még jobban alátámasztja a korábbi megfigyelést: \textbf{x86-on általában nagyobb a speed-up szám},
+de ez nem azt jelenti, hogy az OpenCL kernel önmagában gyorsabb lenne x86 alatt. A fő ok inkább az,
+hogy a \textbf{natív C baseline x86 buildben lassabb}, ezért ugyanaz a GPU-s teljesítmény nagyobb arányt ad.
+
+\section{A legalacsonyabb és legmagasabb speed-up tartományok}
+
+\subsection{Az 5 legkisebb speed-up érték}
+
+\begin{table}[H]
+  \centering
+  \caption{Az 5 legkisebb OpenCL speed-up érték a teljes mérési halmazban.}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={PC,BuildArchitecture,PowerState,Algorithm,KeySizeBits,DataSizeMegabytes,Direction,mean_speedup},
+    columns/PC/.style={string type, column name=Gép},
+    columns/BuildArchitecture/.style={string type, column name=Build},
+    columns/PowerState/.style={string type, column name=Tápellátás},
+    columns/Algorithm/.style={string type, column name=Algoritmus},
+    columns/KeySizeBits/.style={column name=Kulcs (bit), fixed, precision=0},
+    columns/DataSizeMegabytes/.style={column name=Adat (MB), fixed, precision=0},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/mean_speedup/.style={column name=Speed-up, fixed, precision=2},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/speedup_bottom5.csv}}
+\end{table}
+
+Az alsó tartományban főleg \textbf{PC3} szerepel, vagyis a laptopos platform. Ez összhangban van a
+korábbi tápellátásos és architektúrás vizsgálattal: itt a GPU-platform szerényebb, és a rendszer teljesítménye
+érzékenyebb a futási környezetre.
+
+\subsection{Az 5 legnagyobb speed-up érték}
+
+\begin{table}[H]
+  \centering
+  \caption{Az 5 legnagyobb OpenCL speed-up érték a teljes mérési halmazban.}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={PC,BuildArchitecture,PowerState,Algorithm,KeySizeBits,DataSizeMegabytes,Direction,mean_speedup},
+    columns/PC/.style={string type, column name=Gép},
+    columns/BuildArchitecture/.style={string type, column name=Build},
+    columns/PowerState/.style={string type, column name=Tápellátás},
+    columns/Algorithm/.style={string type, column name=Algoritmus},
+    columns/KeySizeBits/.style={column name=Kulcs (bit), fixed, precision=0},
+    columns/DataSizeMegabytes/.style={column name=Adat (MB), fixed, precision=0},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/mean_speedup/.style={column name=Speed-up, fixed, precision=2},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/speedup_top5.csv}}
+\end{table}
+
+A felső tartományban szinte teljesen \textbf{PC4 x86} dominál. Ez is azt mutatja, hogy a legnagyobb
+speed-up nem feltétlenül azt jelenti, hogy ott a legjobb az OpenCL abszolút teljesítménye, hanem azt,
+hogy ott a \textbf{natív baseline-hoz képest} a legnagyobb a relatív előny. A dokumentum szempontjából
+pont ez volt a lényeges mérőszám, mert a feladatban a saját C implementációmhoz akartam viszonyítani a
+párhuzamosítással elért gyorsulást.
+
+\cleardoublepage

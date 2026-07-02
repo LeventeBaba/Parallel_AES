@@ -1,0 +1,126 @@
+\chapter{Paraméterhatások: kulcsméret és adatméret}
+
+A PC4 méréssorozat különösen részletes, ezért itt tudok értelmesen vizsgálni
+\textbf{kulcsméret} és \textbf{adatméret} szerinti trendeket, mind CTR, mind GCM esetén.
+
+\section{Kulcsméret hatása (PC4, 64 MB)}
+
+Általános elvárás, hogy nagyobb kulcsméret (192/256 bit) valamivel több műveletet igényel
+(kulcsütemezés, több round), ezért a throughput csökkenhet. A mérések ezt szépen mutatják
+mind a natív CPU, mind az OpenCL esetén.
+
+\subsection{CTR (PC4, x64, Encrypt, 64 MB)}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.92\textwidth,
+      height=6.0cm,
+      xlabel={Kulcsméret (bit)},
+      ylabel={Throughput (\mbps)},
+      grid=both,
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=3},
+      xtick={128,192,256},
+    ]
+      \addplot table[x=KeySizeBits, y=NativeCpu, col sep=comma] {\GenPath/pc4_ctr_keysize_64mb_x64_encrypt.csv};
+      \addplot table[x=KeySizeBits, y=OpenCl,   col sep=comma] {\GenPath/pc4_ctr_keysize_64mb_x64_encrypt.csv};
+      \legend{Natív CPU, OpenCL}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC4 (x64) -- CTR Encrypt throughput a kulcsméret függvényében (64 MB).}
+\end{figure}
+
+\subsection{GCM (PC4, x64, Encrypt, 64 MB)}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.92\textwidth,
+      height=6.0cm,
+      xlabel={Kulcsméret (bit)},
+      ylabel={Throughput (\mbps)},
+      grid=both,
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=3},
+      xtick={128,192,256},
+    ]
+      \addplot table[x=KeySizeBits, y=NativeCpu, col sep=comma] {\GenPath/pc4_gcm_keysize_64mb_x64_encrypt.csv};
+      \addplot table[x=KeySizeBits, y=OpenCl,   col sep=comma] {\GenPath/pc4_gcm_keysize_64mb_x64_encrypt.csv};
+      \addplot table[x=KeySizeBits, y=ManagedAes, col sep=comma] {\GenPath/pc4_gcm_keysize_64mb_x64_encrypt.csv};
+      \legend{Natív CPU, OpenCL}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC4 (x64) -- GCM Encrypt throughput a kulcsméret függvényében (64 MB).}
+\end{figure}
+
+\subsection{Megfigyelések}
+
+\begin{itemize}
+  \item Mind CTR, mind GCM esetén a throughput \textbf{csökken} 128 $\rightarrow$ 192 $\rightarrow$ 256 bit kulcsméretnél.
+  \item A csökkenés mértéke különböző engine-eknél eltér: a natív CPU-nál a ``tiszta'' számítás dominál,
+        OpenCL-nél pedig a kernel + adatmozgatás aránya is beleszól.
+  \item A managed .NET görbe sokkal magasabban van: ez reálisan egy erősen optimalizált implementáció eredménye,
+        amit itt referenciaként használok (nem baseline-ként).
+\end{itemize}
+
+\section{Adatméret hatása (PC4, 256 bit kulcs, 64 MB vs 256 MB)}
+
+Az OpenCL-es megoldásnál várható volt, hogy nagyobb adatnál javul a hatékonyság, mert
+a fix költségek (\emph{init}, buffer allokáció, host--device másolás indítása) jobban amortizálódnak.
+
+\subsection{GCM (PC4, x64, Encrypt, key=256)}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.92\textwidth,
+      height=6.0cm,
+      xlabel={Bemenet mérete (MB)},
+      ylabel={Throughput (\mbps)},
+      grid=both,
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=3},
+      xtick={64,256},
+    ]
+      \addplot table[x=DataSizeMegabytes, y=NativeCpu, col sep=comma] {\GenPath/pc4_gcm_datasize_key256_x64_encrypt.csv};
+      \addplot table[x=DataSizeMegabytes, y=OpenCl,   col sep=comma] {\GenPath/pc4_gcm_datasize_key256_x64_encrypt.csv};
+      \addplot table[x=DataSizeMegabytes, y=ManagedAes, col sep=comma] {\GenPath/pc4_gcm_datasize_key256_x64_encrypt.csv};
+      \legend{Natív CPU, OpenCL}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC4 (x64) -- GCM Encrypt throughput a bemenet méretének függvényében (key=256).}
+\end{figure}
+
+\subsection{CTR (PC4, x64, Encrypt, key=256)}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.92\textwidth,
+      height=6.0cm,
+      xlabel={Bemenet mérete (MB)},
+      ylabel={Throughput (\mbps)},
+      grid=both,
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=3},
+      xtick={64,256},
+    ]
+      \addplot table[x=DataSizeMegabytes, y=NativeCpu, col sep=comma] {\GenPath/pc4_ctr_datasize_key256_x64_encrypt.csv};
+      \addplot table[x=DataSizeMegabytes, y=OpenCl,   col sep=comma] {\GenPath/pc4_ctr_datasize_key256_x64_encrypt.csv};
+      \legend{Natív CPU, OpenCL}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC4 (x64) -- CTR Encrypt throughput a bemenet méretének függvényében (key=256).}
+\end{figure}
+
+\subsection{Következtetések}
+
+\begin{itemize}
+  \item A natív CPU throughput szinte változatlan (a művelet lineáris az input méretében, a fix overhead kicsi).
+  \item OpenCL-nél nagyobb inputnál jellemzően \textbf{jobb} throughputot mértem, ami az amortizációt támasztja alá.
+  \item A managed .NET eredményeknél a különbség kisebb és néha ellentétes irányú is lehet; ezt elsősorban
+        CPU órajel/boost, memória és háttérterhelés miatti varianciának tulajdonítom.
+\end{itemize}
+
+\cleardoublepage

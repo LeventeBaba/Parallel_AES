@@ -1,0 +1,86 @@
+\chapter{Eredmények áttekintése}
+
+Ebben a fejezetben összefoglalom a legfontosabb, gyorsan látható trendeket.
+A részletes, ``miért'' jellegű magyarázatok és további bontások a következő fejezetekben jönnek.
+
+\section{Mit tartalmaznak a mérések?}
+
+A \code{Docs/Stats} mappában összesen több tucat mérés van:
+
+\begin{itemize}
+  \item \textbf{PC1}: GCM, 256 bit, 64 MB, x64 (OpenCL x86 nem futott).
+  \item \textbf{PC2}: GCM, 256 bit, 64 MB, x86 és x64.
+  \item \textbf{PC3}: GCM, 256 bit, 64 MB, x86 és x64, \emph{töltőn} és \emph{akkuról} is.
+  \item \textbf{PC4}: CTR és GCM, 128/192/256 bit, 64 MB; továbbá 256 bit mellett 256 MB-os futások is; x86 és x64.
+\end{itemize}
+
+A dokumentum a nyers CSV-kből egy Python előfeldolgozóval (\code{Docs/scripts/generate\_stats.py})
+kiszámolja az iterációk átlagát/szórását, és ezeket teszi be táblázatokba/grafikonokba
+(\code{Docs/generated/*.csv}). A nyers mérések érintetlenek maradnak.
+
+\section{Általános kép: Native vs OpenCL vs Managed}
+
+A mérések alapján három jellegzetes viselkedés látszik:
+
+\begin{enumerate}
+  \item A \textbf{natív CPU} implementáció (saját C) jellemzően a \emph{leglassabb} -- ez szándékos baseline szerep.
+  \item Az \textbf{OpenCL} útvonal a natív baseline-hoz képest \emph{nagyságrendi} gyorsulást is adhat,
+        különösen erős GPU-n és nagyobb adatmennyiségnél.
+  \item A \textbf{.NET managed AES} modern CPU-n gyakran \emph{még az OpenCL-t is veri}, mert
+        erősen optimalizált (pl. AES-NI), és nem fizet host--device adatmozgatási költséget.
+\end{enumerate}
+
+Fontos: ettől a GPU-s útvonal még nem ``rossz'': a projekt szempontjából az volt a lényeg,
+hogy a párhuzamosítás és a gyorsítás logikája jól mérhető legyen, és a GCM komplexebb,
+``hibrid'' jellegű terhelése is elemezhető legyen.
+
+\section{Gyors ``reality check'' táblák}
+
+A következő táblák a \textbf{GCM-256, 64 MB} esetet mutatják néhány gépen, mert ez mindenhol szerepel,
+így jó közös alapot ad összevetésre.
+
+\subsection{PC2: x86 vs x64 összehasonlítás (GCM-256, 64 MB)}
+
+\begin{table}[H]
+  \centering
+  \caption{PC2 -- átlagos áteresztőképesség \mbps-ban (x86 vs x64).}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    columns={Engine,Direction,x86,x64,ratio_x64_over_x86},
+    columns/Engine/.style={string type, column name=Engine},
+    columns/Direction/.style={string type, column name=Irány},
+    columns/x86/.style={column name=x86 (\mbps), fixed, fixed zerofill, precision=2},
+    columns/x64/.style={column name=x64 (\mbps), fixed, fixed zerofill, precision=2},
+    columns/ratio_x64_over_x86/.style={column name=Arány (x64/x86), fixed, precision=3},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/pc2_arch_gcm256_64mb.csv}}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ybar,
+      bar width=7pt,
+      width=0.92\textwidth,
+      height=6.2cm,
+      enlarge x limits=0.06,
+      ylabel={Throughput (\mbps)},
+      xtick=data,
+      x tick label style={rotate=35, anchor=east},
+      legend style={at={(0.5,1.02)},anchor=south,legend columns=2},
+      grid=both,
+    ]
+      % A fájl sorai determinisztikusan: Engine=ManagedAes/NativeCpu/OpenCl, Direction=Decrypt majd Encrypt
+      \addplot table[x expr=\coordindex, y=x86, col sep=comma] {\GenPath/pc2_arch_gcm256_64mb.csv};
+      \addplot table[x expr=\coordindex, y=x64, col sep=comma] {\GenPath/pc2_arch_gcm256_64mb.csv};
+      \legend{x86, x64}
+      \addplot[draw=none] coordinates {(0,0)};
+      \node[anchor=north west] at (rel axis cs:0.02,0.98) {\scriptsize Sorrend: ManagedAes D/E, NativeCpu D/E, OpenCl D/E};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{PC2 -- x86 vs x64 throughput összevetés (GCM-256, 64 MB).}
+\end{figure}
+
+\cleardoublepage

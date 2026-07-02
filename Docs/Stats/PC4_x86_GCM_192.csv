@@ -1,0 +1,70 @@
+#SessionId,d27d394e-0f10-49d6-bf3a-0184bf1b0e27
+#CreatedUtc,2026-03-18T19:52:25.5769597+00:00
+#Algorithm,Gcm
+#Padding,N/A
+#KeySizeBits,192
+#DataSizeMegabytes,64
+#IterationCount,5
+#WarmupBeforeRun,True
+#Password,Levi2003@
+#SaltBase64,3+O2msENbS5/r+time1nRA==
+#Iv16Base64,73fCvF3F+wMlSp+bO4i96g==
+#Iv12Base64,+dDEHTAOmz4lPC9G
+#AadBase64,5TFJWI1j3A3O7fUeEcZ/aA==
+#EnvironmentDescription,".NET 10.0.5 | Windows 10 Enterprise 25H2 | x86 | AMD Ryzen 7 5800X 8-Core Processor              (Cores: 8, Logical: 16, Max MHz: 4700) | GPU: NVIDIA GeForce RTX 4060 | RAM: 32.00 GiB, 2 module(s), 2400 MHz | Power: AC power | OpenCL: OpenCL 3.0 CUDA"
+#FrameworkDescription,.NET 10.0.5
+#OperatingSystemDescription,Microsoft Windows 10.0.26200
+#WindowsVersion,Windows 10 Enterprise 25H2
+#WindowsBuild,Build 26200.8037
+#ProcessArchitecture,X86
+#BuildArchitecture,x86
+#LogicalProcessorCount,16
+#ProcessorName,AMD Ryzen 7 5800X 8-Core Processor             
+#ProcessorCoreCount,8
+#ProcessorLogicalCoreCount,16
+#ProcessorMaxClockMHz,4700
+#GpuName,NVIDIA GeForce RTX 4060
+#MotherboardName,ASUSTeK COMPUTER INC. TUF GAMING B550M-PLUS
+#PowerSource,AC power
+#WindowsPowerPlan,Balanced [381b4222-f694-41f0-9685-ff5bb260df2e]
+#RamTotal,"32.00 GiB, 2 module(s), 2400 MHz"
+#RamModules,16.00 GiB 2400 MHz Kingston KF3600C16D4/16GX | 16.00 GiB 2400 MHz Kingston KF3600C16D4/16GX
+#OpenClPlatformName,NVIDIA CUDA
+#OpenClPlatformVersion,OpenCL 3.0 CUDA 13.0.0
+#OpenClDeviceName,NVIDIA GeForce RTX 4060
+#OpenClDeviceVersion,OpenCL 3.0 CUDA
+#OpenClCVersion,OpenCL C 1.2 
+#OpenClInfoStatus,OpenCL platform and device information resolved successfully.
+#Notes,"The benchmark compares the native sequential AES, the OpenCL-parallel AES, and managed .NET AES when the selected combination is available. Speed-up is reported only for the OpenCL-parallel AES relative to the native sequential AES baseline. Managed AES is shown as an informational reference only and is not used as the speed-up baseline. Managed AES is benchmarked only for CBC and GCM. Decrypt benchmarks reuse a shared pre-generated ciphertext per iteration to reduce peak memory usage and keep inputs identical across engines. Padding is ignored for GCM. The benchmark is running in a 32-bit process, so large payloads may hit tighter memory limits, especially for decrypt benchmarks."
+
+TimestampUtc,Iteration,Engine,Direction,Algorithm,Padding,KeySizeBits,InputBytes,OutputBytes,ElapsedMilliseconds,ThroughputMegabytesPerSecond,Succeeded,SpeedupVsSequentialNativeCpu,ManagedReferenceRatio,Note
+2026-03-18T19:52:25.5769597+00:00,1,NativeCpu,Encrypt,Gcm,None,192,67108864,67108864,2857.984000,22.393407,True,,,
+2026-03-18T19:52:25.5769597+00:00,1,OpenCl,Encrypt,Gcm,None,192,67108864,67108864,86.042500,743.818462,True,33.214302,,
+2026-03-18T19:52:25.5769597+00:00,1,ManagedAes,Encrypt,Gcm,None,192,67108864,67108864,39.210900,1632.199210,True,,,
+2026-03-18T19:52:25.5769597+00:00,1,NativeCpu,Decrypt,Gcm,None,192,67108864,67108864,2856.525800,22.404839,True,,,
+2026-03-18T19:52:25.5769597+00:00,1,OpenCl,Decrypt,Gcm,None,192,67108864,67108864,76.455000,837.093715,True,37.367127,,
+2026-03-18T19:52:25.5769597+00:00,1,ManagedAes,Decrypt,Gcm,None,192,67108864,67108864,35.769300,1789.243849,True,,,
+2026-03-18T19:52:25.5769597+00:00,2,NativeCpu,Encrypt,Gcm,None,192,67108864,67108864,2855.569700,22.412340,True,,,
+2026-03-18T19:52:25.5769597+00:00,2,OpenCl,Encrypt,Gcm,None,192,67108864,67108864,78.397700,816.350480,True,36.453131,,
+2026-03-18T19:52:25.5769597+00:00,2,ManagedAes,Encrypt,Gcm,None,192,67108864,67108864,39.037000,1639.470246,True,,,
+2026-03-18T19:52:25.5769597+00:00,2,NativeCpu,Decrypt,Gcm,None,192,67108864,67108864,2855.966300,22.409228,True,,,
+2026-03-18T19:52:25.5769597+00:00,2,OpenCl,Decrypt,Gcm,None,192,67108864,67108864,76.746400,833.915337,True,37.225247,,
+2026-03-18T19:52:25.5769597+00:00,2,ManagedAes,Decrypt,Gcm,None,192,67108864,67108864,36.136300,1771.072301,True,,,
+2026-03-18T19:52:25.5769597+00:00,3,NativeCpu,Encrypt,Gcm,None,192,67108864,67108864,2856.763200,22.402977,True,,,
+2026-03-18T19:52:25.5769597+00:00,3,OpenCl,Encrypt,Gcm,None,192,67108864,67108864,77.428500,826.569028,True,36.909427,,
+2026-03-18T19:52:25.5769597+00:00,3,ManagedAes,Encrypt,Gcm,None,192,67108864,67108864,38.896000,1645.413410,True,,,
+2026-03-18T19:52:25.5769597+00:00,3,NativeCpu,Decrypt,Gcm,None,192,67108864,67108864,2856.012900,22.408862,True,,,
+2026-03-18T19:52:25.5769597+00:00,3,OpenCl,Decrypt,Gcm,None,192,67108864,67108864,76.876400,832.505164,True,37.162298,,
+2026-03-18T19:52:25.5769597+00:00,3,ManagedAes,Decrypt,Gcm,None,192,67108864,67108864,36.062600,1774.691786,True,,,
+2026-03-18T19:52:25.5769597+00:00,4,NativeCpu,Encrypt,Gcm,None,192,67108864,67108864,2862.366100,22.359125,True,,,
+2026-03-18T19:52:25.5769597+00:00,4,OpenCl,Encrypt,Gcm,None,192,67108864,67108864,77.944000,821.102330,True,36.665319,,
+2026-03-18T19:52:25.5769597+00:00,4,ManagedAes,Encrypt,Gcm,None,192,67108864,67108864,39.130100,1635.569549,True,,,
+2026-03-18T19:52:25.5769597+00:00,4,NativeCpu,Decrypt,Gcm,None,192,67108864,67108864,2859.516700,22.381405,True,,,
+2026-03-18T19:52:25.5769597+00:00,4,OpenCl,Decrypt,Gcm,None,192,67108864,67108864,76.963600,831.561933,True,37.120193,,
+2026-03-18T19:52:25.5769597+00:00,4,ManagedAes,Decrypt,Gcm,None,192,67108864,67108864,35.989400,1778.301389,True,,,
+2026-03-18T19:52:25.5769597+00:00,5,NativeCpu,Encrypt,Gcm,None,192,67108864,67108864,2856.525000,22.404845,True,,,
+2026-03-18T19:52:25.5769597+00:00,5,OpenCl,Encrypt,Gcm,None,192,67108864,67108864,79.351900,806.533933,True,36.014785,,
+2026-03-18T19:52:25.5769597+00:00,5,ManagedAes,Encrypt,Gcm,None,192,67108864,67108864,39.480300,1621.061643,True,,,
+2026-03-18T19:52:25.5769597+00:00,5,NativeCpu,Decrypt,Gcm,None,192,67108864,67108864,2856.496700,22.405067,True,,,
+2026-03-18T19:52:25.5769597+00:00,5,OpenCl,Decrypt,Gcm,None,192,67108864,67108864,77.073500,830.376199,True,37.067263,,
+2026-03-18T19:52:25.5769597+00:00,5,ManagedAes,Decrypt,Gcm,None,192,67108864,67108864,36.250400,1765.497760,True,,,

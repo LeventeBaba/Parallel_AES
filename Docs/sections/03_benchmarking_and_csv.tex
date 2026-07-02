@@ -1,0 +1,73 @@
+\chapter{Benchmark módszertan és a CSV-k felépítése}
+
+\section{Benchmark futtatás lépései}
+
+A WinForms alkalmazásban a \emph{Benchmark} fülön beállítható:
+
+\begin{itemize}
+  \item algoritmus: \textbf{CTR} vagy \textbf{GCM}
+  \item kulcsméret: 128/192/256 bit
+  \item adatméret: a mért bemenet mérete MB-ban (tipikusan 64 MB, néhol 256 MB)
+  \item iterációk száma (a mért körök száma)
+  \item warm-up: a mérés előtti bemelegítés (különösen OpenCL-nél fontos a cold-start miatt)
+\end{itemize}
+
+Minden iterációban azonos paraméterek mellett futtatok \textbf{Encrypt} és \textbf{Decrypt} méréseket,
+mindhárom engine-re (amennyiben az adott kombináció támogatott).
+
+\section{Mit jelentenek a mezők?}
+
+A nyers CSV-k két részből állnak:
+
+\begin{enumerate}
+  \item \textbf{Meta sorok} \code{\#Kulcs,Érték} formában:
+    környezet, gép, OS, build architektúra, OpenCL platform eszköz, stb.
+  \item \textbf{Adatsorok} táblázatos formában: iteráció-szintű mérések.
+\end{enumerate}
+
+\subsection{Adatsor (táblázat) fontos oszlopai}
+
+\begin{description}
+  \item[Engine] \code{NativeCpu} / \code{OpenCl} / \code{ManagedAes}
+  \item[Direction] \code{Encrypt} vagy \code{Decrypt}
+  \item[ElapsedMilliseconds] a művelet nettó ideje \ms-ban
+  \item[ThroughputMegabytesPerSecond] áteresztőképesség \mbps-ban
+  \item[SpeedupVsSequentialNativeCpu] csak OpenCL-nél: gyorsulás a natív szekvenciális CPU-hoz képest
+\end{description}
+
+\textbf{Fontos:} a gyorsulást mindig a natív CPU baseline-hoz viszonyítom.
+A .NET menedzselt AES-t csak \emph{referenciaként} tüntetem fel.
+
+\section{Mérési környezetek (PC1--PC4)}
+
+A CSV-kből a benchmark során automatikusan kiíratom a legfontosabb környezeti adatokat:
+.NET verzió, Windows verzió/build, CPU, GPU, RAM, valamint OpenCL platform + device.
+
+Az alábbi táblázat a CSV-kből generált, összefoglaló környezetlista (\code{generated/machines\_summary\_pgf.csv}).
+
+\begin{table}[H]
+  \centering
+  \caption{A mérések fő környezeti jellemzői a CSV metaadatok alapján.}\label{tab:machines}
+  \fittable{\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+    columns={PC,BuildArchitecture,PowerSourceHu,WindowsBuild,ProcessorName,GpuName,OpenClPlatformName},
+    columns/PC/.style={column name=PC, column type=c},
+    columns/BuildArchitecture/.style={column name=Arch., column type=c},
+    columns/PowerSourceHu/.style={column name=Táp, column type=c},
+    columns/WindowsBuild/.style={column name=Windows build, column type=c},
+    columns/ProcessorName/.style={column name=CPU, column type={>{\raggedright\arraybackslash}p{4.0cm}}},
+    columns/GpuName/.style={column name=GPU, column type={>{\raggedright\arraybackslash}p{3.0cm}}},
+    columns/OpenClPlatformName/.style={column name=OpenCL platform, column type={>{\raggedright\arraybackslash}p{2.6cm}}},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+  ]{\GenPath/machines_summary_pgf.csv}}
+\end{table}
+
+\section{Megjegyzés a PC1 OpenCL x86 futásról}
+
+A projekt során a \textbf{PC1} gépen az OpenCL-es \textbf{x86} build nem akart lefutni
+(valószínűleg 32 bites OpenCL runtime/driver hiánya miatt).
+Ez a dokumentumban külön megjegyzésként jelenik meg, és a PC1 esetében ezért csak x64-es OpenCL eredmények szerepelnek.
+
+\cleardoublepage

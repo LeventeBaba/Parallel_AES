@@ -1,0 +1,90 @@
+% !TeX program = lualatex
+\documentclass[12pt,a4paper]{scrreprt}
+
+% --- Language & fonts (LuaLaTeX) ---
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{hungarian}
+\setotherlanguage{english}
+
+% --- Layout ---
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Tables/figures ---
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{xurl}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[section]{placeins}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\sisetup{
+  detect-all,
+  group-separator = {\,},
+  group-minimum-digits = 4,
+  round-mode = places,
+  round-precision = 2
+}
+
+% --- Links ---
+\emergencystretch=2em
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+% --- TikZ & pgfplots ---
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.18}
+
+% --- Small helpers ---
+\newcommand{\code}[1]{\path{#1}}
+\newcommand{\fittable}[1]{%
+  \begingroup%
+  \setlength{\tabcolsep}{4pt}%
+  \footnotesize%
+  \begin{adjustbox}{max width=\textwidth}%
+    #1%
+  \end{adjustbox}%
+  \endgroup%
+}
+\newcommand{\mbps}{\si{\mega\byte\per\second}}
+\newcommand{\ms}{\si{\milli\second}}
+
+% Read generated CSVs in a single place
+\newcommand{\GenPath}{../generated}
+
+\begin{document}
+
+\input{sections/00_cover.tex}
+
+\tableofcontents
+\cleardoublepage
+
+\input{sections/01_intro_project.tex}
+\input{sections/02_aes_gcm.tex}
+\input{sections/03_benchmarking_and_csv.tex}
+\input{sections/04_results_overview.tex}
+\input{sections/05_analysis_arch_power.tex}
+\input{sections/05b_speedup_extremes.tex}
+\input{sections/06_analysis_keysize_datasize.tex}
+\input{sections/07_conclusions.tex}
+
+
+\end{document}
